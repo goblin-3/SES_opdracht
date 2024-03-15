@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    runs-on: windows-latest
+    runs-on: macos-latest
 
     steps:
       - name: Checkout code
@@ -23,12 +23,11 @@ jobs:
       - name: Change directory to candycrush to execute gradle commands from project root
         run: cd candycrush
 
-      - name: Give gradle wrapper +x permission (not needed on Windows)
-        run: |
-          echo Nothing to do here, permissions are handled differently on Windows.
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 
 
       - name: Build with Gradle
-        run: .\gradlew.bat build
+        run: ./gradlew build
 
       - name: Run tests
-        run: .\gradlew.bat test
+        run: ./gradlew test
