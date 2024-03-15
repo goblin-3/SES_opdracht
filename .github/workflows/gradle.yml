@@ -2,34 +2,32 @@ name: Run tests on push to main and pull requests
 
 on:
   push:
-    branches: [ "main"]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "main"]
-
+    branches: [ "main" ]
 
 jobs:
   test:
-    runs-on: macos-latest
-    permissions: 
-      contents: read
-      
+    runs-on: windows-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+
       - name: Change directory to candycrush to execute gradle commands from project root
         run: cd candycrush
 
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-      - name: give gradle +x permission 
-        run: chmod +x ./gradlew
-        
+      - name: Give gradle wrapper +x permission (not needed on Windows)
+        run: |
+          echo Nothing to do here, permissions are handled differently on Windows.
+
       - name: Build with Gradle
-        run: ./gradlew build
+        run: .\gradlew.bat build
 
       - name: Run tests
-        run: ./gradlew test
+        run: .\gradlew.bat test
