@@ -17,14 +17,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Change directory to candycrush to execute gradle commands from project root
+        run: cd candycrush
+
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Change directory to candycrush to execute gradle commands from project root
-        run: cd candycrush
+
 
       - name: Grant execute permision for Gradle
         run: chmod +x gradlew
