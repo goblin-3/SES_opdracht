@@ -33,7 +33,9 @@ jobs:
       run: chmod +x gradlew
 
     - name: Build with Gradle Wrapper
+      working-directory: ./candycrush
       run: ./gradlew build
 
     - name: Run tests
+      working-directory: ./candycrush
       run: ./gradlew test
