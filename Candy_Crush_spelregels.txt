@@ -19,8 +19,8 @@ Het doel van Candy Crush is om zoveel mogelijk punten te behalen door het matche
 - Het spel kan speciale snoepjes bevatten die extra krachten hebben wanneer ze worden gematcht: 
 *** <CaveCandy>: Wanneer je een rij van minstens 3 snoepjes maakt, wordt ook de volledige onderste rij verwijderd.  
 *** <ExplosiveCandy>: Wanneer je een rij van minstens 3 snoepjes maakt, worden ook alle andere snoepje die aan de rij grenzen verwijderd. 
-*** <naamSnoepje>: Deze snoepjes zijn dubbele punten waard. 
-*** <naamSnoepje>: Wanneer je een rij van minstens 3 snoepjes maakt, krijg je 3 extra zetten. 
+*** <ChocolatCandy>: Deze snoepjes zijn dubbele punten waard. 
+*** <NuclearCandy>: Wanneer je een rij van minstens 3 snoepjes maakt, blaast het speelveld op. 
  
 4. Puntentelling en einde spel: 
 - Elke snoepje in een verwijderde rij levert evenveel punten op als het aantal snoepjes dat verwijderd worden. 
