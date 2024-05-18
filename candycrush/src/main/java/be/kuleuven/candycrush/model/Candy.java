@@ -1,12 +1,18 @@
 package be.kuleuven.candycrush.model;
-
 public interface Candy {
+
+    int getColor();
 
     record NormalCandy(int color) implements Candy {
         public NormalCandy {
             if (color < 0 || color > 3) {
                 throw new IllegalArgumentException("Color value must be between 0 and 3");
             }
+        }
+
+        @Override
+        public int getColor() {
+            return color;
         }
     }
 
@@ -16,6 +22,11 @@ public interface Candy {
                 throw new IllegalArgumentException("Color value must be between 0 and 3");
             }
         }
+
+        @Override
+        public int getColor() {
+            return color;
+        }
     }
 
     record ExplosiveCandy(int color) implements Candy {
@@ -23,6 +34,11 @@ public interface Candy {
             if (color < 0 || color > 3) {
                 throw new IllegalArgumentException("Color value must be between 0 and 3");
             }
+        }
+
+        @Override
+        public int getColor() {
+            return color;
         }
     }
 
@@ -32,6 +48,11 @@ public interface Candy {
                 throw new IllegalArgumentException("Color value must be between 0 and 3");
             }
         }
+
+        @Override
+        public int getColor() {
+            return color;
+        }
     }
 
     record NuclearCandy(int color) implements Candy {
@@ -39,6 +60,11 @@ public interface Candy {
             if (color < 0 || color > 3) {
                 throw new IllegalArgumentException("Color value must be between 0 and 3");
             }
+        }
+
+        @Override
+        public int getColor() {
+            return color;
         }
     }
 }

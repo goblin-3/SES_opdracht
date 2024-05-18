@@ -136,10 +136,10 @@ public class CandycrushModel {
 
 
             for (Position neighbour : neighboursPositions) {
-                if ((speelbord.getCellAt(neighbour)).equals(currentCandy)) {
+                if (((speelbord.getCellAt(neighbour)).getColor())==(currentCandy.getColor())) {
                     newCandy = createNewCandy();
 
-                    while (newCandy.equals(currentCandy)) {
+                    while (newCandy.equals(currentCandy)&&newCandy.getColor() == currentCandy.getColor()) {
                         newCandy = createNewCandy();
                     }
 

@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -456,4 +457,28 @@ public class CandycrushModelTests {
             }
 
         }
+
+    @Test
+    void testGetPositionsOfElement_BasicFunctionality() {
+        CandycrushModel.BoardSize boardSize = new CandycrushModel.BoardSize(4, 4);
+        Board<Candy> board = new Board<>(boardSize);
+
+        Candy normalCandy = new Candy.NormalCandy(1);
+        Candy specialCandy = new Candy.ChocolatCandy(1);
+
+        board.setCellAt(new CandycrushModel.Position(0, 0, boardSize), normalCandy);
+        board.setCellAt(new CandycrushModel.Position(1, 1, boardSize), normalCandy);
+        board.setCellAt(new CandycrushModel.Position(2, 2, boardSize), specialCandy);
+
+
+        List<CandycrushModel.Position> normalCandyPositions = board.getPositionsOfElement(normalCandy);
+        assertEquals(2, normalCandyPositions.size());
+        assertTrue(normalCandyPositions.contains(new CandycrushModel.Position(0, 0, boardSize)));
+        assertTrue(normalCandyPositions.contains(new CandycrushModel.Position(1, 1, boardSize)));
+
+
+        List<CandycrushModel.Position> specialCandyPositions = board.getPositionsOfElement(specialCandy);
+        assertEquals(1, specialCandyPositions.size());
+        assertTrue(specialCandyPositions.contains(new CandycrushModel.Position(2, 2, boardSize)));
+    }
 }
