@@ -4,14 +4,13 @@ package be.kuleuven.candycrush.model;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Random;
 
 
 
 public class CandycrushModel {
     private String speler;
-    private ArrayList<Candy> speelbord;
+    private Board<Candy> speelbord;
 
 
     private boolean initialized = false;
@@ -19,6 +18,8 @@ public class CandycrushModel {
     private int score;
 
     private BoardSize boardSize;
+
+    private static CellCreator candyCellCreator;
 
 
 
@@ -29,19 +30,27 @@ public class CandycrushModel {
 
     public void initializeSpeelbord(){
         if (!initialized){
-        speelbord = new ArrayList<>();
+    //    speelbord = new ArrayList<>();
+
         boardSize = new BoardSize(4,4);
+            speelbord = new Board<Candy>(boardSize);
        // width = 4;
        // height = 4;
         score =0;
 
-        for (int i = 0; i < boardSize.columns* boardSize.rows; i++){      //        for (int i = 0; i < width*height; i++){
+
+
+
+        speelbord.fill(candyCellCreator);
+
+   /*     for (int i = 0; i < boardSize.columns* boardSize.rows; i++){      //        for (int i = 0; i < width*height; i++){
 
             Candy newCandy = createNewCandy();
 
 
+
             speelbord.add(newCandy);
-        }
+        }*/
         initialized = true;
         }
     }
@@ -49,7 +58,11 @@ public class CandycrushModel {
     public static void main(String[] args) {
         CandycrushModel model = new CandycrushModel("arne");
         int i = 1;
-        Iterator<Candy> iter = model.getSpeelbord().iterator();
+
+        candyCellCreator = model.CreateCandyCellCreator();
+
+
+      /*  Iterator<Candy> iter = model.getSpeelbord().iterator();
         while(iter.hasNext()){
             Candy candy = iter.next();
             System.out.print(candy);
@@ -59,18 +72,19 @@ public class CandycrushModel {
             }
             i++;
         }
-        System.out.print("\n");
+        System.out.print("\n");*/
 
     }
     public String getSpeler() {
         return speler;
     }
 
-    public ArrayList<Candy> getSpeelbord() {
+    public Board<Candy> getSpeelbord() {
         return speelbord;
     }
 
-    public void setSpeelbord(ArrayList<Candy> speelbord){
+    public void setSpeelbord(Board<Candy> speelbord){
+
         this.speelbord = speelbord;
     }
 
@@ -107,7 +121,7 @@ public class CandycrushModel {
             neighboursPositions = sameNeighbourPositions(neighboursPositions , position);
 
 
-            Candy currentCandy = speelbord.get(index);
+            Candy currentCandy = speelbord.getCellAt(position);
             Candy newCandy = createNewCandy();
 
 
@@ -116,23 +130,22 @@ public class CandycrushModel {
 
                  newCandy = createNewCandy();
             }
-            speelbord.set(index,newCandy);
+            speelbord.setCellAt(position,newCandy);
             score++;
 
 
 
-            for ( Position neighbour : neighboursPositions ){
-                int neighbourIndex = neighbour.toIndex();
-                currentCandy = speelbord.get(neighbourIndex);
-                 newCandy = createNewCandy();
+            for (Position neighbour : neighboursPositions) {
+                if ((speelbord.getCellAt(neighbour)).equals(currentCandy)) {
+                    newCandy = createNewCandy();
 
+                    while (newCandy.equals(currentCandy)) {
+                        newCandy = createNewCandy();
+                    }
 
-
-                while (newCandy.equals(currentCandy)) {
-                     newCandy = createNewCandy();
+                    speelbord.setCellAt(neighbour, newCandy);
+                    score++;
                 }
-                speelbord.set(neighbourIndex, newCandy);
-                score++;
             }
 
 
@@ -156,7 +169,7 @@ public class CandycrushModel {
         }
 
         public Iterable<Position> positions(){
-            List<Position> positions = new ArrayList<>();
+            ArrayList<Position> positions = new ArrayList<>();
 
             for (int r = 0; r < rows; r++) {
                 for (int c = 0; c < columns; c++) {
@@ -218,8 +231,8 @@ public class CandycrushModel {
         ArrayList<Position> sameNeighbourPositions = new ArrayList<>();
 
         for (Position position :allNeighboursPositions) {
-            int currentIndex = position.toIndex();
-            if (speelbord.get(selectedPosition.toIndex()).equals(speelbord.get(currentIndex))) {
+           // int currentIndex = position.toIndex();
+            if (speelbord.getCellAt(selectedPosition).equals(speelbord.getCellAt(position))) {
                 sameNeighbourPositions.add(position);
             }
         }
@@ -227,7 +240,7 @@ public class CandycrushModel {
         return  sameNeighbourPositions;
     }
 
-    public Candy createNewCandy(){
+    public  Candy createNewCandy(){
         Random random1 = new Random();
         Random random2 = new Random();
 
@@ -248,5 +261,42 @@ public class CandycrushModel {
         }
         return  newCandy;
     }
+    public CellCreator CreateCandyCellCreator(){
+
+        candyCellCreator = new CellCreator<Candy>() {
+
+            @Override
+            public Candy createCell() {
+                Random random1 = new Random();
+                Random random2 = new Random();
+
+                int randomGetal1 = random1.nextInt(4);
+                int randomGetal2 = random2 .nextInt(100);
+                Candy newCandy;
+
+                if (randomGetal2<80) {
+                    newCandy = new Candy.NormalCandy(randomGetal1);
+                } else if (randomGetal2 <90) {
+                    newCandy = new Candy.CaveCandy(0);
+                } else if (randomGetal2<95) {
+                    newCandy = new Candy.ChocolatCandy(1);
+                } else if (randomGetal2<99) {
+                    newCandy = new Candy.ExplosiveCandy(2);
+                } else {
+                    newCandy = new Candy.NuclearCandy(3);
+                }
+
+
+
+                return newCandy;
+            }
+        };
+        return candyCellCreator;
+
+    }
+
+
+
+
 
 }

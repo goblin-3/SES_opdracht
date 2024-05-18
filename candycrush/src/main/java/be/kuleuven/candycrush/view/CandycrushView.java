@@ -34,7 +34,7 @@ public class CandycrushView extends Region {
         for(int r = 0 ; r< model.getBoardSize().rows();r++){
             for(int c = 0 ; c< model.getBoardSize().columns();c++){
                 CandycrushModel.Position position = new CandycrushModel.Position(r,c,model.getBoardSize());
-                Candy candy = model.getSpeelbord().get(position.toIndex());
+                Candy candy = model.getSpeelbord().getCellAt(position);
                 Rectangle rectangle = new Rectangle(c* widthCandy,r* heigthCandy,widthCandy, heigthCandy);
                 rectangle.setFill(Color.TRANSPARENT);
                 rectangle.setStroke(Color.BLACK);

@@ -80,6 +80,7 @@ public class CandycrushController {
 
         if (!playerName.isEmpty()){
             model = new CandycrushModel(playerName);
+            model.CreateCandyCellCreator();
             model.initializeSpeelbord();
             view = new CandycrushView(model);
             speelbord.getChildren().add(view);
