@@ -3,6 +3,7 @@ package be.kuleuven.candycrush.model;
 
 import javafx.geometry.Pos;
 import org.junit.Before;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -457,7 +458,7 @@ public class CandycrushModelTests {
         }
 
     @Test
-    void testGetPositionsOfElement_BasicFunctionality() {
+    void testGetPositionsOfElement() {
         CandycrushModel.BoardSize boardSize = new CandycrushModel.BoardSize(4, 4);
         Board<Candy> board = new Board<>(boardSize);
 
@@ -525,5 +526,69 @@ public class CandycrushModelTests {
                 new CandycrushModel.Position(2, 3, model.getBoardSize())
         )));
     }
+
+    @Test
+    public void testUpdateBoardRemovesMatchesAndDropsCandies() {
+            CandycrushModel model = new CandycrushModel("test");
+        CandycrushModel.BoardSize boardSize = new CandycrushModel.BoardSize(4, 4);
+        model.setBoardSize(boardSize);
+            model.initializeSpeelbord();
+
+
+        model.getSpeelbord().setCellAt(new CandycrushModel.Position(0, 0, model.getBoardSize()), new Candy.NormalCandy(1));
+        model.getSpeelbord().setCellAt(new CandycrushModel.Position(0, 1, model.getBoardSize()), new Candy.NormalCandy(1));
+        model.getSpeelbord().setCellAt(new CandycrushModel.Position(0, 2, model.getBoardSize()), new Candy.NormalCandy(1));
+
+        model.getSpeelbord().setCellAt(new CandycrushModel.Position(1, 0, model.getBoardSize()), new Candy.NormalCandy(2));
+        model.getSpeelbord().setCellAt(new CandycrushModel.Position(1, 1, model.getBoardSize()), new Candy.NormalCandy(2));
+        model.getSpeelbord().setCellAt(new CandycrushModel.Position(1, 2, model.getBoardSize()), new Candy.NormalCandy(2));
+
+
+        Set<List<CandycrushModel.Position>> matches = model.findAllMatches();
+        assertEquals(2, matches.size()); // will sometimes fail due to randomly generated board from fill
+
+
+        boolean result = model.updateBoard();
+        Assertions.assertTrue(result);
+
+
+        matches = model.findAllMatches();
+        assertTrue(matches.isEmpty());
+
+
+        for (int col = 0; col < model.getBoardSize().columns(); col++) {
+            CandycrushModel.Position pos = new CandycrushModel.Position(model.getBoardSize().rows() - 1, col, model.getBoardSize());
+            Assertions.assertNotNull( model.getSpeelbord().getCellAt(pos));
+        }
+    }
+
+
+    @Test
+    public void testUpdateBoardFullyClearsBoardIfFullyClearable() {
+
+        CandycrushModel model = new CandycrushModel("Test Player");
+        CandycrushModel.BoardSize boardSize = new CandycrushModel.BoardSize(4, 4);
+        model.setBoardSize(boardSize);
+        model.initializeSpeelbord();
+
+        for (int row = 0; row < model.getBoardSize().rows(); row++) {
+            for (int col = 0; col < model.getBoardSize().columns(); col++) {
+                model.getSpeelbord().setCellAt(new CandycrushModel.Position(row, col, model.getBoardSize()), new Candy.NormalCandy(1));
+            }
+        }
+
+
+        boolean result = model.updateBoard();
+        assertTrue(result);
+
+
+        for (int row = 0; row < model.getBoardSize().rows(); row++) {
+            for (int col = 0; col < model.getBoardSize().columns(); col++) {
+                CandycrushModel.Position pos = new CandycrushModel.Position(row, col, model.getBoardSize());
+                assertNull(model.getSpeelbord().getCellAt(pos));
+            }
+        }
+    }
+
 }
 

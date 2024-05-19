@@ -39,7 +39,7 @@ public class CandycrushModel {
         score =0;
 
 
-
+            candyCellCreator = CreateCandyCellCreator();
 
         speelbord.fill(candyCellCreator);
 
@@ -324,23 +324,48 @@ public class CandycrushModel {
     public Stream<Position> horizontalStartingPositions() {
         return boardSize.positions().stream()
                 .filter(pos -> pos.column() < boardSize.columns() - 2)
-                .filter(pos -> pos.column() == 0 || !speelbord.getCellAt(pos).equals(speelbord.getCellAt(new Position(pos.row(), pos.column() - 1, boardSize))));
+                .filter(pos -> {
+                    Candy currentCandy = speelbord.getCellAt(pos);
+                    Candy leftCandy = pos.column() == 0 ? null : speelbord.getCellAt(new Position(pos.row(), pos.column() - 1, boardSize));
+                    return currentCandy != null && (leftCandy == null || !currentCandy.equals(leftCandy));
+                });
     }
+
 
 
     public Stream<Position> verticalStartingPositions() {
         return boardSize.positions().stream()
                 .filter(pos -> pos.row() < boardSize.rows() - 2)
-                .filter(pos -> pos.row() == 0 || !speelbord.getCellAt(pos).equals(speelbord.getCellAt(new Position(pos.row() - 1, pos.column(), boardSize))));
+                .filter(pos -> {
+                    Candy currentCandy = speelbord.getCellAt(pos);
+                    Candy aboveCandy = pos.row() == 0 ? null : speelbord.getCellAt(new Position(pos.row() - 1, pos.column(), boardSize));
+                    return currentCandy != null && (aboveCandy == null || !currentCandy.equals(aboveCandy));
+                });
     }
 
 
-    public List<Position> longestMatchToRight(Position pos) {
-        Candy candy = speelbord.getCellAt(pos);
-        return pos.walkRight()
-                .takeWhile(p -> speelbord.getCellAt(p).equals(candy))
-                .collect(Collectors.toList());
+
+    private List<Position> longestMatchToRight(Position start) {
+        List<Position> match = new ArrayList<>();
+        match.add(start);
+
+        Candy startCandy = speelbord.getCellAt(start);
+        if (startCandy == null) {
+            return match;
+        }
+
+        for (int col = start.column() + 1; col < boardSize.columns(); col++) {
+            Position nextPos = new Position(start.row(), col, boardSize);
+            Candy nextCandy = speelbord.getCellAt(nextPos);
+            if (nextCandy == null || !startCandy.equals(nextCandy)) {
+                break;
+            }
+            match.add(nextPos);
+        }
+
+        return match;
     }
+
 
 
     public List<Position> longestMatchDown(Position pos) {
@@ -371,6 +396,67 @@ public class CandycrushModel {
         return matches;
     }
 
+    public void clearMatch(List<Position> match){
+        int  size = match.size();
 
+        if (match.isEmpty()|| match == null){
+            return;
+        }
+
+
+            Position position = match.get(size-1);
+            speelbord.setCellAt(position,null);
+            match.remove(size-1);
+
+            clearMatch(match);
+
+
+
+    }
+    public void fallDownTo(Position pos){
+        if(pos.row()==0){
+            return;
+        }
+
+        Position positionAbove = new Position(pos.row()-1, pos.column(), boardSize);
+        Candy candyAbove = speelbord.getCellAt(positionAbove);
+        Candy candyPos = speelbord.getCellAt(pos);
+        if(candyAbove!=null &&candyPos ==null){
+            speelbord.setCellAt(pos,candyAbove);
+            speelbord.setCellAt(positionAbove,null);
+            fallDownTo(positionAbove);
+
+        }
+        if (candyAbove!=null){
+            fallDownTo(positionAbove);
+        }
+
+
+
+
+    }
+
+    public boolean updateBoard() {
+        Set<List<Position>> matches = findAllMatches();
+
+        if (matches.isEmpty()) {
+            return false;
+        }
+
+        for (List<Position> match : matches) {
+            clearMatch(match);
+        }
+
+        for (int col = 0; col < boardSize.columns(); col++) {
+            for (int row = boardSize.rows() - 1; row >= 0; row--) {
+                Position pos = new Position(row, col, boardSize);
+                fallDownTo(pos);
+            }
+        }
+
+
+        boolean moreMatches = updateBoard();
+        return true || moreMatches;
+    }
 
 }
