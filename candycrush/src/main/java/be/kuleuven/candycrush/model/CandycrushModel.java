@@ -2,10 +2,10 @@ package be.kuleuven.candycrush.model;
 
 
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Random;
-
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 
 public class CandycrushModel {
@@ -168,7 +168,7 @@ public class CandycrushModel {
             if (columns < 1) throw new IllegalArgumentException("#colums can't be smaller then 1");
         }
 
-        public Iterable<Position> positions(){
+        public Collection<Position> positions(){
             ArrayList<Position> positions = new ArrayList<>();
 
             for (int r = 0; r < rows; r++) {
@@ -201,7 +201,7 @@ public class CandycrushModel {
             return new Position(row,column,size);
         }
 
-        public Iterable<Position> neighbourPositions(){
+        public Collection<Position> neighbourPositions(){
             ArrayList<Position> neighbours = new ArrayList<>();
 
             for (int r = -1; r<=1;r++){
@@ -226,8 +226,26 @@ public class CandycrushModel {
             return column == boardSize().columns() - 1;
         }
 
+        public Stream<Position> walkLeft() {
+            return IntStream.rangeClosed(0, column)
+                    .mapToObj(col -> new Position(row, column - col, boardSize));
+        }
+        public Stream<Position>walkRight(){
+            return IntStream.rangeClosed(0,boardSize.columns() - column-1).mapToObj(col -> new Position(row,column + col,boardSize));
+        }
+
+        public Stream<Position> walkUp() {
+            return IntStream.rangeClosed(0, row)
+                    .mapToObj(r -> new Position(row - r, column, boardSize));
+        }
+
+        public Stream<Position> walkDown() {
+            return IntStream.rangeClosed(0, boardSize.rows() - row - 1)
+                    .mapToObj(r -> new Position(row + r, column, boardSize));
+        }
+
     }
-    public Iterable<Position> sameNeighbourPositions(Iterable<Position> allNeighboursPositions,Position selectedPosition){
+    public Collection<Position> sameNeighbourPositions(Iterable<Position> allNeighboursPositions,Position selectedPosition){
         ArrayList<Position> sameNeighbourPositions = new ArrayList<>();
 
         for (Position position :allNeighboursPositions) {
@@ -295,7 +313,63 @@ public class CandycrushModel {
 
     }
 
+    public boolean firstTwoHaveCandy(Candy candy, Stream<Position> positions) {
+        List<Position> positionList = positions.limit(2).collect(Collectors.toList());
+        return positionList.size() == 2 &&
+                speelbord.getCellAt(positionList.get(0)).equals(candy) &&
+                speelbord.getCellAt(positionList.get(1)).equals(candy);
+    }
 
+
+    public Stream<Position> horizontalStartingPositions() {
+        return boardSize.positions().stream()
+                .filter(pos -> pos.column() < boardSize.columns() - 2)
+                .filter(pos -> pos.column() == 0 || !speelbord.getCellAt(pos).equals(speelbord.getCellAt(new Position(pos.row(), pos.column() - 1, boardSize))));
+    }
+
+
+    public Stream<Position> verticalStartingPositions() {
+        return boardSize.positions().stream()
+                .filter(pos -> pos.row() < boardSize.rows() - 2)
+                .filter(pos -> pos.row() == 0 || !speelbord.getCellAt(pos).equals(speelbord.getCellAt(new Position(pos.row() - 1, pos.column(), boardSize))));
+    }
+
+
+    public List<Position> longestMatchToRight(Position pos) {
+        Candy candy = speelbord.getCellAt(pos);
+        return pos.walkRight()
+                .takeWhile(p -> speelbord.getCellAt(p).equals(candy))
+                .collect(Collectors.toList());
+    }
+
+
+    public List<Position> longestMatchDown(Position pos) {
+        Candy candy = speelbord.getCellAt(pos);
+        return pos.walkDown()
+                .takeWhile(p -> speelbord.getCellAt(p).equals(candy))
+                .collect(Collectors.toList());
+    }
+
+
+    public Set<List<Position>> findAllMatches() {
+        Set<List<Position>> matches = new HashSet<>();
+
+        horizontalStartingPositions().forEach(pos -> {
+            List<Position> match = longestMatchToRight(pos);
+            if (match.size() >= 3) {
+                matches.add(match);
+            }
+        });
+
+        verticalStartingPositions().forEach(pos -> {
+            List<Position> match = longestMatchDown(pos);
+            if (match.size() >= 3) {
+                matches.add(match);
+            }
+        });
+
+        return matches;
+    }
 
 
 

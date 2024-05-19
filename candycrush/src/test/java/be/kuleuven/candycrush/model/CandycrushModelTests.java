@@ -5,10 +5,8 @@ import javafx.geometry.Pos;
 import org.junit.Before;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -481,4 +479,51 @@ public class CandycrushModelTests {
         assertEquals(1, specialCandyPositions.size());
         assertTrue(specialCandyPositions.contains(new CandycrushModel.Position(2, 2, boardSize)));
     }
+    @Test
+    public void testFindAllMatches(){
+        CandycrushModel model = new CandycrushModel("testPlayer");
+        CandycrushModel.BoardSize boardSize = new CandycrushModel.BoardSize(4, 4);
+        model.setBoardSize(boardSize);
+
+        Board<Candy> board = new Board<>(model.getBoardSize());
+
+        int[][] initialCandies = {
+                {1, 1, 1, 2},
+                {3, 2, 2, 2},
+                {3, 1, 1, 1},
+                {2, 3, 3, 2}
+        };//testboard provided by our good friend chatgpt
+
+        for (int r = 0; r <= boardSize.rows()-1; r++) {
+            for (int c = 0; c <= boardSize.columns()-1; c++) {
+                Candy candy = new Candy.NormalCandy(initialCandies[r][c]);
+                CandycrushModel.Position position = new CandycrushModel.Position(r, c, boardSize);
+                board.setCellAt(position, candy);
+            }
+        }
+
+        model.setSpeelbord(board);
+        Set<List<CandycrushModel.Position>> matches = model.findAllMatches();
+
+
+        assertEquals(3, matches.size());
+
+
+        assertTrue(matches.contains(List.of(
+                new CandycrushModel.Position(0, 0, boardSize),
+                new CandycrushModel.Position(0, 1, boardSize),
+                new CandycrushModel.Position(0, 2, boardSize)
+        )));
+        assertTrue(matches.contains(List.of(
+                new CandycrushModel.Position(1, 1, boardSize),
+                new CandycrushModel.Position(1, 2, boardSize),
+                new CandycrushModel.Position(1, 3, boardSize)
+        )));
+        assertTrue(matches.contains(List.of(
+                new CandycrushModel.Position(2, 1, model.getBoardSize()),
+                new CandycrushModel.Position(2, 2, model.getBoardSize()),
+                new CandycrushModel.Position(2, 3, model.getBoardSize())
+        )));
+    }
 }
+
