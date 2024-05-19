@@ -590,5 +590,24 @@ public class CandycrushModelTests {
         }
     }
 
+@Test
+    public void testBacktrackingAlgorithm(){
+    CandycrushModel model = new CandycrushModel("Test Player");
+    CandycrushModel.BoardSize boardSize = new CandycrushModel.BoardSize(4, 4);
+    model.setBoardSize(boardSize);
+    model.initializeSpeelbord();
+
+    model.fillBoardFromString("""
+   @@o#
+   o*#o
+   @@**
+   *#@@""");
+
+int score = model.maximizeScore(model.getSpeelbord(),0);
+Assertions.assertEquals(16, score);
+}
+
+
+
 }
 

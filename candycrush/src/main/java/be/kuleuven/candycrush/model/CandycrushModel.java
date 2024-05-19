@@ -23,6 +23,8 @@ public class CandycrushModel {
 
 
 
+
+
     public CandycrushModel(String speler) {
         this.speler = speler;
 
@@ -33,7 +35,7 @@ public class CandycrushModel {
     //    speelbord = new ArrayList<>();
 
         boardSize = new BoardSize(4,4);
-            speelbord = new Board<Candy>(boardSize);
+        speelbord = new Board<Candy>(boardSize);
        // width = 4;
        // height = 4;
         score =0;
@@ -438,6 +440,7 @@ public class CandycrushModel {
 
     public boolean updateBoard() {
         Set<List<Position>> matches = findAllMatches();
+        score = matches.stream().mapToInt(List::size).sum();
 
         if (matches.isEmpty()) {
             return false;
@@ -445,6 +448,7 @@ public class CandycrushModel {
 
         for (List<Position> match : matches) {
             clearMatch(match);
+            score=score+3;
         }
 
         for (int col = 0; col < boardSize.columns(); col++) {
@@ -457,6 +461,116 @@ public class CandycrushModel {
 
         boolean moreMatches = updateBoard();
         return true || moreMatches;
+    }
+
+    private static Candy characterToCandy(char c) {
+        return switch(c) {
+            case '.' -> null;
+            case 'o' -> new Candy.NormalCandy(0);
+            case '*' -> new Candy.NormalCandy(1);
+            case '#' -> new Candy.NormalCandy(2);
+            case '@' -> new Candy.NormalCandy(3);
+            default -> throw new IllegalArgumentException("Unexpected value: " + c);
+        };
+    }
+
+    private boolean areNeighbors(Position pos1, Position pos2) {
+        int rowDiff = Math.abs(pos1.row() - pos2.row());
+        int colDiff = Math.abs(pos1.column() - pos2.column());
+
+        return (rowDiff == 1 && colDiff == 0) || (rowDiff == 0 && colDiff == 1);
+    }
+
+
+    public int maximizeScore(Board<Candy> board, int currentScore) {
+        int maxScore = currentScore;
+
+        for (int row = 0; row < boardSize.rows(); row++) {
+            for (int col = 0; col < boardSize.columns(); col++) {
+                Position currentPos = new Position(row, col, boardSize);
+                List<Position> potentialMoves = getPotentialMoves(currentPos);
+
+                for (Position move : potentialMoves) {
+                    if (isValidSwap(currentPos, move) && matchAfterSwitch(currentPos, move)) {
+                        performSwap(currentPos, move);
+                        int scoreFromMove = updateBoardAndCalculateScore();
+                        int totalScore = maximizeScore(board, currentScore + scoreFromMove);
+                        maxScore = Math.max(maxScore, totalScore);
+                        undoSwap(currentPos, move);
+                    }
+                }
+            }
+        }
+
+        return maxScore;
+    }
+
+    private List<Position> getPotentialMoves(Position pos) {
+        List<Position> moves = new ArrayList<>();
+        if (pos.row() > 0) moves.add(new Position(pos.row() - 1, pos.column(), boardSize)); // Up
+        if (pos.row() < boardSize.rows() - 1) moves.add(new Position(pos.row() + 1, pos.column(), boardSize)); // Down
+        if (pos.column() > 0) moves.add(new Position(pos.row(), pos.column() - 1, boardSize)); // Left
+        if (pos.column() < boardSize.columns() - 1) moves.add(new Position(pos.row(), pos.column() + 1, boardSize)); // Right
+        return moves;
+}
+    private boolean isValidSwap(Position pos1, Position pos2) {
+        return areNeighbors(pos1, pos2) &&
+                speelbord.getCellAt(pos1) != null &&
+                speelbord.getCellAt(pos2) != null;
+    }
+
+    private boolean matchAfterSwitch(Position pos1, Position pos2) {
+        performSwap(pos1, pos2);
+        Set<List<Position>> matches = findAllMatches();
+        performSwap(pos1, pos2);  // Undo the swap
+        return !matches.isEmpty();
+    }
+
+    private void performSwap(Position pos1, Position pos2) {
+        Candy temp = speelbord.getCellAt(pos1);
+        speelbord.setCellAt(pos1, speelbord.getCellAt(pos2));
+        speelbord.setCellAt(pos2, temp);
+    }
+    private void undoSwap(Position pos1, Position pos2) {
+        performSwap(pos1, pos2);
+    }
+
+    public  void fillBoardFromString(String configuration) {
+        var lines = configuration.toLowerCase().lines().toList();
+        for (int row = 0; row < lines.size(); row++) {
+            var line = lines.get(row);
+            for (int col = 0; col < line.length(); col++) {
+                speelbord.setCellAt(new Position(row, col, boardSize), characterToCandy(line.charAt(col)));
+            }
+        }
+
+    }
+
+    private int updateBoardAndCalculateScore() {
+        int totalScore = 0;
+
+        while (true) {
+            Set<List<Position>> matches = findAllMatches();
+            if (matches.isEmpty()) {
+                break;
+            }
+
+            int scoreFromMatches = matches.stream().mapToInt(List::size).sum();
+            totalScore += scoreFromMatches;
+
+            for (List<Position> match : matches) {
+                clearMatch(match);
+            }
+
+            for (int col = 0; col < boardSize.columns(); col++) {
+                for (int row = boardSize.rows() - 1; row >= 0; row--) {
+                    Position pos = new Position(row, col, boardSize);
+                    fallDownTo(pos);
+                }
+            }
+        }
+
+        return totalScore;
     }
 
 }

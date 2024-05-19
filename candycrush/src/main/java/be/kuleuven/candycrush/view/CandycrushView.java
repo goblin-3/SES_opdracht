@@ -1,6 +1,6 @@
 package be.kuleuven.candycrush.view;
 
-import be.kuleuven.candycrush.CandycrushController;
+
 import be.kuleuven.candycrush.model.Candy;
 import be.kuleuven.candycrush.model.CandycrushModel;
 import javafx.scene.Node;
